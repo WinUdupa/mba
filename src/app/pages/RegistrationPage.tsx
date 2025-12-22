@@ -1,5 +1,5 @@
 import { motion, useInView } from "motion/react";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
@@ -13,22 +13,138 @@ interface RegistrationPageProps {
 }
 
 export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState({
-    registrationType: "",
-    participantType: "",
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    institution: "",
-    country: "",
-    paperTitle: "",
-    trackNumber: "",
-    dietaryRequirements: "",
-    accommodation: false
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [isSendingLink, setIsSendingLink] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [showWelcomeBack, setShowWelcomeBack] = useState(false);
+
+  // Initialize from localStorage if available
+  const [currentStep, setCurrentStep] = useState(() => {
+    const saved = localStorage.getItem('registrationStep');
+    return saved ? parseInt(saved) : 1;
   });
 
+  const [formData, setFormData] = useState(() => {
+    const saved = localStorage.getItem('registrationFormData');
+    return saved ? JSON.parse(saved) : {
+      registrationType: "",
+      participantType: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      institution: "",
+      country: "",
+      paperTitle: "",
+      trackNumber: "",
+      dietaryRequirements: "",
+      accommodation: false
+    };
+  });
+
+  // Check for auth errors in URL on mount
+  useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const error = hashParams.get('error');
+    const errorDescription = hashParams.get('error_description');
+    
+    if (error) {
+      let errorMessage = 'Authentication failed. ';
+      
+      if (error === 'access_denied' && errorDescription?.includes('expired')) {
+        errorMessage = 'Email verification link has expired. Please request a new one.';
+      } else if (errorDescription) {
+        errorMessage += errorDescription.replace(/\+/g, ' ');
+      }
+      
+      setAuthError(errorMessage);
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+  }, []);
+
+  // Listen for auth state changes
+  useEffect(() => {
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user) {
+        setEmailVerified(true);
+        setAuthError(null);
+        
+        // Store email verification status
+        localStorage.setItem('emailVerified', 'true');
+        localStorage.setItem('verifiedEmail', session.user.email || '');
+        
+        // Show welcome back message if there's saved progress
+        const savedStep = localStorage.getItem('registrationStep');
+        if (savedStep && parseInt(savedStep) > 1) {
+          setShowWelcomeBack(true);
+          setTimeout(() => setShowWelcomeBack(false), 5000);
+        }
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Check existing session on mount
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) {
+        setEmailVerified(true);
+        localStorage.setItem('emailVerified', 'true');
+        localStorage.setItem('verifiedEmail', data.session.user.email || '');
+      }
+    });
+
+    // Check if email was previously verified
+    const wasVerified = localStorage.getItem('emailVerified') === 'true';
+    const verifiedEmail = localStorage.getItem('verifiedEmail');
+    
+    if (wasVerified && verifiedEmail && verifiedEmail === formData.email) {
+      setEmailVerified(true);
+    }
+  }, [formData.email]);
+
+  // Save form data to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('registrationFormData', JSON.stringify(formData));
+  }, [formData]);
+
+  // Save current step to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('registrationStep', currentStep.toString());
+  }, [currentStep]);
+
+const sendMagicLink = async () => {
+  if (!formData.email) {
+    alert("Please enter your email first.");
+    return;
+  }
+
+  try {
+    setIsSendingLink(true);
+
+    const { error } = await supabase.auth.signInWithOtp({
+      email: formData.email,
+      options: {
+        emailRedirectTo: window.location.origin + "./"
+      }
+    });
+
+    if (error) throw error;
+
+    alert("Verification link sent! Please check your email.");
+  } catch (err) {
+    console.error(err);
+    alert("Failed to send verification email.");
+  } finally {
+    setIsSendingLink(false);
+  }
+};
+
+  
   const submitRegistration = async () => {
   // Basic required field validation
   if (
@@ -118,7 +234,12 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
     }
   ];
 
+  
   const handleNext = () => {
+    if (currentStep === 2 && !emailVerified) {
+    alert("Please verify your email before continuing.");
+    return;
+    }
     if (currentStep < 4) setCurrentStep(currentStep + 1);
   };
 
@@ -431,15 +552,33 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address *</Label>
+
                   <Input
                     id="email"
                     type="email"
                     value={formData.email}
+                    disabled={emailVerified}
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     placeholder="your.email@example.com"
                     className="h-12"
                   />
+
+                  {!emailVerified ? (
+                    <button
+                      type="button"
+                      onClick={sendMagicLink}
+                      disabled={isSendingLink}
+                      className="text-sm text-[#1E4ED8] font-semibold hover:underline"
+                    >
+                      {isSendingLink ? "Sending verification link..." : "Verify email"}
+                    </button>
+                  ) : (
+                    <p className="text-green-600 text-sm font-semibold">
+                      ✓ Email verified
+                    </p>
+                  )}
                 </div>
+
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number *</Label>
                   <Input
