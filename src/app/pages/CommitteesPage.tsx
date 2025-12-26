@@ -12,73 +12,75 @@ export function CommitteesPage({ onNavigate }: CommitteesPageProps) {
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } }
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
   };
 
   const patron = {
     name: "Sri. Narayan Rao R. Maanay",
     designation: "Chairman, Governing Body, BNM Institute of Technology",
-    bio: "Visionary leader committed to excellence in education and fostering innovation at BNMIT, Bengaluru."
+    bio: "Visionary leader committed to excellence in education and fostering innovation at BNMIT, Bengaluru.",
+    image: "/organizers/Sri. Narayan Rao R. Maanay.jpeg"
   };
 
   const patrons = [
-    { name: "Sri. Ashok R. Maanay", designation: "Joint-Secretary, BNMEI, Bengaluru" },
-    { name: "Prof. T. J. Rama Murthy", designation: "Director, BNM Institute of Technology" },
-    { name: "Dr. S. Y. Kulkarni", designation: "Additional Director & Principal, BNMIT" },
-    { name: "Prof. Eishwar N. Maanay", designation: "Dean, BNM Institute of Technology" },
-    { name: "Dr. Krishnamurthy G. N.", designation: "Deputy Director, BNMIT" }
+    { name: "Sri. Ashok R. Maanay", designation: "Joint-Secretary, BNMEI, Bengaluru", image: "/organizers/ashok-maanay.jpg" },
+    { name: "Prof. T. J. Rama Murthy", designation: "Director, BNM Institute of Technology", image: "/organizers/Prof. T. J. Rama Murthy.jpg" },
+    { name: "Dr. S. Y. Kulkarni", designation: "Additional Director & Principal, BNMIT", image: "/organizers/Dr. S Y Kulkarni.webp" },
+    { name: "Prof. Eishwar N. Maanay", designation: "Dean, BNM Institute of Technology", image: "/organizers/Prof. Eishwar Maanay.jpg" },
+    { name: "Dr. Krishnamurthy G. N.", designation: "Deputy Director, BNMIT", image: "/organizers/Dr. Krishnamurthy G N.webp" }
   ];
 
   const chiefMentor = {
     name: "Dr. Pawan Kumar Singh",
     designation: "Director, IIM Trichy",
-    role: "Chief Mentor"
+    role: "Chief Mentor",
+    image: "/organizers/Dr. Pawan Kumar Singh.jpg"
   };
 
   const advisoryBoard = [
-    { name: "Dr. Harsh Purohit", affiliation: "Professor, Dean, FMS, WISDOM, Banasthali Vidyapith", country: "Rajasthan, India" },
-    { name: "Dr. Balasubramanya", affiliation: "Professor, IISc Bengaluru", country: "Karnataka, India" },
-    { name: "Dr. Prakash Singh", affiliation: "Associate Professor, IIM Lucknow", country: "India" },
-    { name: "Dr. Mayank Kumar", affiliation: "Assistant Professor, IIM Ranchi", country: "India" },
-    { name: "Dr. Avinash Srivastava", affiliation: "Associate Professor, IMI Kolkata", country: "India" },
-    { name: "Dr. Amitabh Anand", affiliation: "Associate Professor, Excelia Business School", country: "La Rochelle, France" }
+  { name: "Dr. Harsh Purohit", affiliation: "Professor, Dean, FMS, WISDOM, Banasthali Vidyapith", country: "Rajasthan, India", image: "/organizers/Dr. Harsh Purohit.jpg" },
+  { name: "Dr. Balasubramanya", affiliation: "Professor, IISc Bengaluru", country: "Karnataka, India", image: "/organizers/Dr. Balasubramanya.jpg" },
+  { name: "Dr. Prakash Singh", affiliation: "Associate Professor, IIM Lucknow", country: "India", image: "/organizers/Dr. Prakash Singh.jpg" },
+  { name: "Dr. Mayank Kumar", affiliation: "Assistant Professor, IIM Ranchi", country: "India", image: "/organizers/Dr. Mayank Kumar.jpg" },
+  { name: "Dr. Avinash Srivastava", affiliation: "Associate Professor, IMI Kolkata", country: "India", image: "/organizers/Dr. Avinash Srivastava.jpg" },
+  { name: "Dr. Amitabh Anand", affiliation: "Associate Professor, Excelia Business School", country: "La Rochelle, France", image: "/organizers/Dr. Amitabh Anand.jpg" }
   ];
 
   const steeringCommittee = [
-    { name: "Prof. Eishwar Maanay", designation: "Dean, BNMIT" },
-    { name: "Mrs. Vaishnavee Eishwar Maanay", designation: "Head - Media and Marketing, BNMIT" }
+  { name: "Prof. Eishwar Maanay", designation: "Dean, BNMIT", image: "/organizers/Prof. Eishwar Maanay.jpg" },
+  { name: "Mrs. Vaishnavee Eishwar Maanay", designation: "Head - Media and Marketing, BNMIT", image: "/organizers/Mrs. Vaishnavee Eishwar Maanay.jpg" }
   ];
 
   const organizingCommittee = [
     {
       role: "General Chair",
       members: [
-        { name: "Dr. N Mukund Sharma", designation: "Professor & HoD, MBA, BNMIT" }
+        { name: "Dr. N Mukund Sharma", designation: "Professor & HoD, MBA, BNMIT", image: "/organizers/Dr. N Mukund Sharma.webp" }
       ]
     },
     {
       role: "Organizing Chair",
       members: [
-        { name: "Dr. Padmalini Singh", designation: "Professor, MBA Department" }
+        { name: "Dr. Padmalini Singh", designation: "Professor, MBA Department", image: "/organizers/Dr.-Padmalini-Singh.jpeg.webp" }
       ]
     },
     {
       role: "Organizing Committee Members",
       members: [
-        { name: "Dr. Neetha Mahadev", designation: "Professor" },
-        { name: "Dr. Bhavya Vikas", designation: "Professor" },
-        { name: "Dr. Charithra C. M.", designation: "Associate Professor" },
-        { name: "Dr. Sharath Ambrose", designation: "Assistant Professor" },
-        { name: "Dr. Shilu Varghese", designation: "Assistant Professor" },
-        { name: "Mr. Santhosh K V", designation: "Assistant Professor" },
-        { name: "Mrs. Jasmine Francis", designation: "Assistant Professor" },
-        { name: "Mrs. Ranjitha R", designation: "Assistant Professor" },
-        { name: "Mrs. Prathyusha P", designation: "Assistant Professor" },
-        { name: "Mrs. Vasudha Srivatsa", designation: "Assistant Professor" },
-        { name: "Mr. Vikram Balasubramanian", designation: "Assistant Professor" },
-        { name: "Mr. Srinivas Bharadwaj R", designation: "Assistant Professor" },
-        { name: "Mr. K Nanda Kishore Nadig", designation: "Assistant Professor" },
-        { name: "Mrs. Payal Jindal", designation: "Assistant Professor & TPO" }
+  { name: "Dr. Neetha Mahadev", designation: "Professor", image: "/organizers/Dr. Neetha Mahadev.webp" },
+  { name: "Dr. Bhavya Vikas", designation: "Professor", image: "/organizers/Dr-Bhavya-scaled.jpg.webp" },
+  { name: "Dr. Charithra C. M.", designation: "Associate Professor", image: "/organizers/Dr-Charithra-scaled.jpg.webp" },
+  { name: "Dr. Sharath Ambrose", designation: "Assistant Professor", image: "/organizers/MBA-Sharath-Ambrose-scaled.jpg.webp" },
+  { name: "Dr. Shilu Varghese", designation: "Assistant Professor", image: "/organizers/Shillu-varghese.jpg.webp" },
+  { name: "Mr. Santhosh K V", designation: "Assistant Professor", image: "/organizers/Santhosh-scaled.jpg.webp" },
+  { name: "Mrs. Jasmine Francis", designation: "Assistant Professor", image: "/organizers/Mrs. Jasmine Francis.webp" },
+  { name: "Mrs. Ranjitha R", designation: "Assistant Professor", image: "/organizers/Mrs. Ranjitha R.webp" },
+  { name: "Mrs. Prathyusha P", designation: "Assistant Professor", image: "/organizers/Mrs. Prathyusha P.webp" },
+  { name: "Mrs. Vasudha Srivatsa", designation: "Assistant Professor", image: "/organizers/Mrs. Vasudha Srivatsa.webp" },
+  { name: "Mr. Vikram Balasubramanian", designation: "Assistant Professor", image: "/organizers/Mr.Vikaram.jpg.webp" },
+  { name: "Mr. Srinivas Bharadwaj R", designation: "Assistant Professor", image: "/organizers/MBA-Srinivas-Bharadwaj-scaled.jpg.webp" },
+  { name: "Mr. K Nanda Kishore Nadig", designation: "Assistant Professor", image: "/organizers/MBA-Nanda-Kishore-Nadig-scaled.jpg.webp" },
+  { name: "Mrs. Payal Jindal", designation: "Assistant Professor & TPO", image: "/organizers/Mrs.Payal_.jpg.webp" }
       ]
     }
   ];
@@ -118,9 +120,13 @@ export function CommitteesPage({ onNavigate }: CommitteesPageProps) {
               Chief <span className="text-[#F97316]">Patron</span>
             </h2>
             <div className="bg-white rounded-2xl p-6 sm:p-8 lg:p-10 text-center max-w-[500px] mx-auto shadow-xl border border-[#E2E8F0]">
-              {/* Placeholder Photo */}
-              <div className="bg-gradient-to-br from-[#0B1F3A] to-[#1E4ED8] rounded-xl w-32 h-40 sm:w-40 sm:h-48 mx-auto mb-6 flex items-center justify-center overflow-hidden">
-                <span className="text-[60px] sm:text-[72px]">👤</span>
+              {/* Photo */}
+              <div className="w-32 h-40 sm:w-40 sm:h-48 mx-auto mb-6 rounded-xl overflow-hidden border-4 border-[#E2E8F0] shadow-lg">
+                <img 
+                  src={patron.image} 
+                  alt={patron.name}
+                  className="w-full h-full object-cover object-top"
+                />
               </div>
               <h3 className="text-[#0B1F3A] text-[22px] sm:text-[28px] lg:text-[32px] font-['Montserrat',sans-serif] font-bold mb-2">{patron.name}</h3>
               <p className="text-[#F97316] text-[14px] sm:text-[16px] font-semibold mb-4">{patron.designation}</p>
@@ -152,8 +158,17 @@ export function CommitteesPage({ onNavigate }: CommitteesPageProps) {
                 transition={{ delay: index * 0.05 }}
                 className="bg-white rounded-xl p-5 sm:p-6 shadow-lg border border-[#E2E8F0] text-center hover:border-[#F97316] transition-all"
               >
-                <div className="bg-gradient-to-br from-[#0B1F3A] to-[#1E4ED8] rounded-lg w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-                  <span className="text-white text-[28px]">👤</span>
+                <div className="w-20 h-24 sm:w-24 sm:h-28 mx-auto mb-4 rounded-lg overflow-hidden border-2 border-[#E2E8F0] shadow-md">
+                  <img 
+                    src={member.image} 
+                    alt={member.name}
+                    className="w-full h-full object-cover object-top"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.parentElement!.innerHTML = '<div class="w-full h-full bg-gradient-to-br from-[#0B1F3A] to-[#1E4ED8] flex items-center justify-center"><svg class="w-10 h-10 text-[#F97316]/70" fill="currentColor" viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>';
+                    }}
+                  />
                 </div>
                 <h3 className="text-[#0B1F3A] text-[16px] sm:text-[18px] font-bold mb-1">{member.name}</h3>
                 <p className="text-[#475569] text-[13px] sm:text-[14px]">{member.designation}</p>
@@ -175,8 +190,12 @@ export function CommitteesPage({ onNavigate }: CommitteesPageProps) {
               Chief <span className="text-[#F97316]">Mentor</span>
             </h2>
             <div className="bg-gradient-to-br from-[#F97316]/10 to-white rounded-2xl p-6 sm:p-8 text-center max-w-[400px] mx-auto shadow-lg border-2 border-[#F97316]">
-              <div className="bg-gradient-to-br from-[#F97316] to-[#ea580c] rounded-xl w-24 h-28 sm:w-32 sm:h-36 mx-auto mb-4 flex items-center justify-center">
-                <span className="text-[48px] sm:text-[56px]">🎓</span>
+              <div className="w-24 h-28 sm:w-32 sm:h-36 mx-auto mb-4 rounded-xl overflow-hidden border-2 border-[#F97316] shadow-md">
+                <img 
+                  src={chiefMentor.image} 
+                  alt={chiefMentor.name}
+                  className="w-full h-full object-cover object-top"
+                />
               </div>
               <h3 className="text-[#0B1F3A] text-[20px] sm:text-[24px] font-bold mb-1">{chiefMentor.name}</h3>
               <p className="text-[#F97316] text-[14px] sm:text-[16px] font-semibold mb-1">{chiefMentor.role}</p>
@@ -209,10 +228,12 @@ export function CommitteesPage({ onNavigate }: CommitteesPageProps) {
                 whileHover={{ y: -4, scale: 1.02 }}
                 className="bg-white rounded-xl p-6 sm:p-8 shadow-lg border-2 border-[#E2E8F0] text-center hover:border-[#F97316] hover:shadow-xl transition-all duration-300"
               >
-                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-gradient-to-br from-[#0B1F3A] to-[#1E4ED8] flex items-center justify-center mx-auto mb-4 sm:mb-5 overflow-hidden shadow-md">
-                  <svg className="w-12 h-12 sm:w-14 sm:h-14 text-[#F97316]/70" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                  </svg>
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl mx-auto mb-4 sm:mb-5 overflow-hidden shadow-md border-2 border-[#E2E8F0]">
+                  <img 
+                    src={member.image} 
+                    alt={member.name}
+                    className="w-full h-full object-cover object-top"
+                  />
                 </div>
                 <h3 className="text-[#0B1F3A] text-[18px] sm:text-[20px] lg:text-[22px] font-['Montserrat',sans-serif] font-bold mb-2">{member.name}</h3>
                 <p className="text-[#F97316] text-[14px] sm:text-[15px] font-medium">{member.designation}</p>
@@ -250,10 +271,12 @@ export function CommitteesPage({ onNavigate }: CommitteesPageProps) {
                 className="bg-white rounded-xl p-5 sm:p-6 shadow-lg border-2 border-[#E2E8F0] hover:border-[#F97316] hover:shadow-xl transition-all duration-300"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-br from-[#0B1F3A] to-[#1E4ED8] flex-shrink-0 flex items-center justify-center shadow-md">
-                    <svg className="w-8 h-8 sm:w-9 sm:h-9 text-[#F97316]/70" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex-shrink-0 overflow-hidden shadow-md border-2 border-[#E2E8F0]">
+                    <img 
+                      src={member.image} 
+                      alt={member.name}
+                      className="w-full h-full object-cover object-top"
+                    />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-[#0B1F3A] text-[16px] sm:text-[18px] font-['Montserrat',sans-serif] font-bold mb-1 truncate">
@@ -318,11 +341,13 @@ export function CommitteesPage({ onNavigate }: CommitteesPageProps) {
                           whileHover={{ y: -4, scale: 1.02 }}
                           className="bg-white rounded-xl p-6 sm:p-8 border-2 border-[#E2E8F0] shadow-lg hover:shadow-xl hover:border-[#F97316] transition-all duration-300 text-center"
                         >
-                          {/* Profile Image Placeholder */}
-                          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl bg-gradient-to-br from-[#0B1F3A] to-[#1E4ED8] flex items-center justify-center mx-auto mb-4 sm:mb-5 overflow-hidden shadow-md">
-                            <svg className="w-12 h-12 sm:w-14 sm:h-14 text-[#F97316]/70" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                            </svg>
+                          {/* Profile Image */}
+                          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl mx-auto mb-4 sm:mb-5 overflow-hidden shadow-md border-2 border-[#E2E8F0]">
+                            <img 
+                              src={member.image} 
+                              alt={member.name}
+                              className="w-full h-full object-cover object-top"
+                            />
                           </div>
                           <h4 className="text-[#0B1F3A] text-[16px] sm:text-[18px] lg:text-[20px] font-['Montserrat',sans-serif] font-bold mb-2">{member.name}</h4>
                           <p className="text-[#F97316] text-[13px] sm:text-[14px] lg:text-[15px] font-medium">{member.designation}</p>
