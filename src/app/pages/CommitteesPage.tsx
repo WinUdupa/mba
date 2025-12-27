@@ -1,89 +1,211 @@
 import { motion, useInView } from "motion/react";
 import { useRef } from "react";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from "../components/ui/accordion";
+
+// Patron
+import NarayanMaanay from "@/assets/Sri. Narayan Rao R. Maanay.jpeg";
+
+// Patrons
+import AshokMaanay from "@/assets/ashok-maanay.jpg";
+import RamaMurthy from "@/assets/Prof. T. J. Rama Murthy.jpg";
+import Kulkarni from "@/assets/Dr. S Y Kulkarni.webp";
+import EishwarMaanay from "@/assets/Prof. Eishwar Maanay.jpg";
+import Krishnamurthy from "@/assets/Dr. Krishnamurthy G N.webp";
+
+// Chief Mentor
+import PawanSingh from "@/assets/Dr. Pawan Kumar Singh.jpg";
+
+// Advisory Board
+import HarshPurohit from "@/assets/Dr. Harsh Purohit.jpg";
+import Balasubramanya from "@/assets/Dr. Balasubramanya.jpg";
+import PrakashSingh from "@/assets/Dr. Prakash Singh.jpg";
+import MayankKumar from "@/assets/Dr. Mayank Kumar.jpg";
+import AvinashSrivastava from "@/assets/Dr. Avinash Srivastava.jpg";
+import AmitabhAnand from "@/assets/Dr. Amitabh Anand.jpg";
+
+// Steering Committee
+import VaishnaveeMaanay from "@/assets/Mrs. Vaishnavee Eishwar Maanay.jpg";
+
+// Organizing Committee
+import MukundSharma from "@/assets/Dr. N Mukund Sharma.webp";
+import PadmaliniSingh from "@/assets/Dr.-Padmalini-Singh.jpeg.webp";
+import NeethaMahadev from "@/assets/Dr. Neetha Mahadev.webp";
+import BhavyaVikas from "@/assets/Dr-Bhavya-scaled.jpg.webp";
+import CharithraCM from "@/assets/Dr-Charithra-scaled.jpg.webp";
+import SharathAmbrose from "@/assets/MBA-Sharath-Ambrose-scaled.jpg.webp";
+import ShiluVarghese from "@/assets/Shillu-varghese.jpg.webp";
+import SanthoshKV from "@/assets/Santhosh-scaled.jpg.webp";
+import JasmineFrancis from "@/assets/Jasmine-scaled.jpg.webp";
+import RanjithaR from "@/assets/Ranjitha-scaled.jpg.webp";
+import PrathyushaP from "@/assets/Prathyusha-Pasupuleti-Photo-1-scaled.jpg.webp";
+import VasudhaSrivatsa from "@/assets/VS-pic-scaled.jpg.webp";
+import VikramBalasubramanian from "@/assets/Mr.Vikaram.jpg.webp";
+import SrinivasBharadwaj from "@/assets/MBA-Srinivas-Bharadwaj-scaled.jpg.webp";
+import NandaKishore from "@/assets/MBA-Nanda-Kishore-Nadig-scaled.jpg.webp";
+import PayalJindal from "@/assets/Mrs.Payal_.jpg.webp";
+
+
 
 interface CommitteesPageProps {
   onNavigate: (page: string) => void;
 }
 
 export function CommitteesPage({ onNavigate }: CommitteesPageProps) {
-  const contentRef = useRef(null);
+  const contentRef = useRef<HTMLDivElement | null>(null);
   const isInView = useInView(contentRef, { once: true, amount: 0.2 });
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } }
-  };
-
-  const patron = {
-    name: "Sri. Narayan Rao R. Maanay",
-    designation: "Chairman, Governing Body, BNM Institute of Technology",
-    bio: "Visionary leader committed to excellence in education and fostering innovation at BNMIT, Bengaluru.",
-    image: "/organizers/Sri. Narayan Rao R. Maanay.jpeg"
-  };
-
-  const patrons = [
-    { name: "Sri. Ashok R. Maanay", designation: "Joint-Secretary, BNMEI, Bengaluru", image: "/organizers/ashok-maanay.jpg" },
-    { name: "Prof. T. J. Rama Murthy", designation: "Director, BNM Institute of Technology", image: "/organizers/Prof. T. J. Rama Murthy.jpg" },
-    { name: "Dr. S. Y. Kulkarni", designation: "Additional Director & Principal, BNMIT", image: "/organizers/Dr. S Y Kulkarni.webp" },
-    { name: "Prof. Eishwar N. Maanay", designation: "Dean, BNM Institute of Technology", image: "/organizers/Prof. Eishwar Maanay.jpg" },
-    { name: "Dr. Krishnamurthy G. N.", designation: "Deputy Director, BNMIT", image: "/organizers/Dr. Krishnamurthy G N.webp" }
-  ];
-
-  const chiefMentor = {
-    name: "Dr. Pawan Kumar Singh",
-    designation: "Director, IIM Trichy",
-    role: "Chief Mentor",
-    image: "/organizers/Dr. Pawan Kumar Singh.jpg"
-  };
-
-  const advisoryBoard = [
-  { name: "Dr. Harsh Purohit", affiliation: "Professor, Dean, FMS, WISDOM, Banasthali Vidyapith", country: "Rajasthan, India", image: "/organizers/Dr. Harsh Purohit.jpg" },
-  { name: "Dr. Balasubramanya", affiliation: "Professor, IISc Bengaluru", country: "Karnataka, India", image: "/organizers/Dr. Balasubramanya.jpg" },
-  { name: "Dr. Prakash Singh", affiliation: "Associate Professor, IIM Lucknow", country: "India", image: "/organizers/Dr. Prakash Singh.jpg" },
-  { name: "Dr. Mayank Kumar", affiliation: "Assistant Professor, IIM Ranchi", country: "India", image: "/organizers/Dr. Mayank Kumar.jpg" },
-  { name: "Dr. Avinash Srivastava", affiliation: "Associate Professor, IMI Kolkata", country: "India", image: "/organizers/Dr. Avinash Srivastava.jpg" },
-  { name: "Dr. Amitabh Anand", affiliation: "Associate Professor, Excelia Business School", country: "La Rochelle, France", image: "/organizers/Dr. Amitabh Anand.jpg" }
-  ];
-
-  const steeringCommittee = [
-  { name: "Prof. Eishwar Maanay", designation: "Dean, BNMIT", image: "/organizers/Prof. Eishwar Maanay.jpg" },
-  { name: "Mrs. Vaishnavee Eishwar Maanay", designation: "Head - Media and Marketing, BNMIT", image: "/organizers/Mrs. Vaishnavee Eishwar Maanay.jpg" }
-  ];
-
-  const organizingCommittee = [
-    {
-      role: "General Chair",
-      members: [
-        { name: "Dr. N Mukund Sharma", designation: "Professor & HoD, MBA, BNMIT", image: "/organizers/Dr. N Mukund Sharma.webp" }
-      ]
-    },
-    {
-      role: "Organizing Chair",
-      members: [
-        { name: "Dr. Padmalini Singh", designation: "Professor, MBA Department", image: "/organizers/Dr.-Padmalini-Singh.jpeg.webp" }
-      ]
-    },
-    {
-      role: "Organizing Committee Members",
-      members: [
-  { name: "Dr. Neetha Mahadev", designation: "Professor", image: "/organizers/Dr. Neetha Mahadev.webp" },
-  { name: "Dr. Bhavya Vikas", designation: "Professor", image: "/organizers/Dr-Bhavya-scaled.jpg.webp" },
-  { name: "Dr. Charithra C. M.", designation: "Associate Professor", image: "/organizers/Dr-Charithra-scaled.jpg.webp" },
-  { name: "Dr. Sharath Ambrose", designation: "Assistant Professor", image: "/organizers/MBA-Sharath-Ambrose-scaled.jpg.webp" },
-  { name: "Dr. Shilu Varghese", designation: "Assistant Professor", image: "/organizers/Shillu-varghese.jpg.webp" },
-  { name: "Mr. Santhosh K V", designation: "Assistant Professor", image: "/organizers/Santhosh-scaled.jpg.webp" },
-  { name: "Mrs. Jasmine Francis", designation: "Assistant Professor", image: "/organizers/Mrs. Jasmine Francis.webp" },
-  { name: "Mrs. Ranjitha R", designation: "Assistant Professor", image: "/organizers/Mrs. Ranjitha R.webp" },
-  { name: "Mrs. Prathyusha P", designation: "Assistant Professor", image: "/organizers/Mrs. Prathyusha P.webp" },
-  { name: "Mrs. Vasudha Srivatsa", designation: "Assistant Professor", image: "/organizers/Mrs. Vasudha Srivatsa.webp" },
-  { name: "Mr. Vikram Balasubramanian", designation: "Assistant Professor", image: "/organizers/Mr.Vikaram.jpg.webp" },
-  { name: "Mr. Srinivas Bharadwaj R", designation: "Assistant Professor", image: "/organizers/MBA-Srinivas-Bharadwaj-scaled.jpg.webp" },
-  { name: "Mr. K Nanda Kishore Nadig", designation: "Assistant Professor", image: "/organizers/MBA-Nanda-Kishore-Nadig-scaled.jpg.webp" },
-  { name: "Mrs. Payal Jindal", designation: "Assistant Professor & TPO", image: "/organizers/Mrs.Payal_.jpg.webp" }
-      ]
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6 }
     }
-  ];
+  };
+
+const patron = {
+  name: "Sri. Narayan Rao R. Maanay",
+  designation: "Chairman, Governing Body, BNM Institute of Technology",
+  bio:
+    "Visionary leader committed to excellence in education and fostering innovation at BNMIT, Bengaluru.",
+  image: NarayanMaanay
+};
+
+const patrons = [
+  {
+    name: "Sri. Ashok R. Maanay",
+    designation: "Joint-Secretary, BNMEI, Bengaluru",
+    image: AshokMaanay
+  },
+  {
+    name: "Prof. T. J. Rama Murthy",
+    designation: "Director, BNM Institute of Technology",
+    image: RamaMurthy
+  },
+  {
+    name: "Dr. S. Y. Kulkarni",
+    designation: "Additional Director & Principal, BNMIT",
+    image: Kulkarni
+  },
+  {
+    name: "Prof. Eishwar N. Maanay",
+    designation: "Dean, BNM Institute of Technology",
+    image: EishwarMaanay
+  },
+  {
+    name: "Dr. Krishnamurthy G. N.",
+    designation: "Deputy Director, BNMIT",
+    image: Krishnamurthy
+  }
+];
+
+const chiefMentor = {
+  name: "Dr. Pawan Kumar Singh",
+  designation: "Director, IIM Trichy",
+  role: "Chief Mentor",
+  image: PawanSingh
+};
+
+const advisoryBoard = [
+  {
+    name: "Dr. Harsh Purohit",
+    affiliation: "Professor, Dean, FMS, WISDOM, Banasthali Vidyapith",
+    country: "Rajasthan, India",
+    image: HarshPurohit
+  },
+  {
+    name: "Dr. Balasubramanya",
+    affiliation: "Professor, IISc Bengaluru",
+    country: "Karnataka, India",
+    image: Balasubramanya
+  },
+  {
+    name: "Dr. Prakash Singh",
+    affiliation: "Associate Professor, IIM Lucknow",
+    country: "India",
+    image: PrakashSingh
+  },
+  {
+    name: "Dr. Mayank Kumar",
+    affiliation: "Assistant Professor, IIM Ranchi",
+    country: "India",
+    image: MayankKumar
+  },
+  {
+    name: "Dr. Avinash Srivastava",
+    affiliation: "Associate Professor, IMI Kolkata",
+    country: "India",
+    image: AvinashSrivastava
+  },
+  {
+    name: "Dr. Amitabh Anand",
+    affiliation: "Associate Professor, Excelia Business School",
+    country: "La Rochelle, France",
+    image: AmitabhAnand
+  }
+];
+
+const steeringCommittee = [
+  {
+    name: "Prof. Eishwar Maanay",
+    designation: "Dean, BNMIT",
+    image: EishwarMaanay
+  },
+  {
+    name: "Mrs. Vaishnavee Eishwar Maanay",
+    designation: "Head - Media and Marketing, BNMIT",
+    image: VaishnaveeMaanay
+  }
+];
+
+const organizingCommittee = [
+  {
+    role: "General Chair",
+    members: [
+      {
+        name: "Dr. N Mukund Sharma",
+        designation: "Professor & HoD, MBA, BNMIT",
+        image: MukundSharma
+      }
+    ]
+  },
+  {
+    role: "Organizing Chair",
+    members: [
+      {
+        name: "Dr. Padmalini Singh",
+        designation: "Professor, MBA Department",
+        image: PadmaliniSingh
+      }
+    ]
+  },
+  {
+    role: "Organizing Committee Members",
+    members: [
+      { name: "Dr. Neetha Mahadev", designation: "Professor", image: NeethaMahadev },
+      { name: "Dr. Bhavya Vikas", designation: "Professor", image: BhavyaVikas },
+      { name: "Dr. Charithra C. M.", designation: "Associate Professor", image: CharithraCM },
+      { name: "Dr. Sharath Ambrose", designation: "Assistant Professor", image: SharathAmbrose },
+      { name: "Dr. Shilu Varghese", designation: "Assistant Professor", image: ShiluVarghese },
+      { name: "Mr. Santhosh K V", designation: "Assistant Professor", image: SanthoshKV },
+      { name: "Mrs. Jasmine Francis", designation: "Assistant Professor", image: JasmineFrancis },
+      { name: "Mrs. Ranjitha R", designation: "Assistant Professor", image: RanjithaR },
+      { name: "Mrs. Prathyusha P", designation: "Assistant Professor", image: PrathyushaP },
+      { name: "Mrs. Vasudha Srivatsa", designation: "Assistant Professor", image: VasudhaSrivatsa },
+      { name: "Mr. Vikram Balasubramanian", designation: "Assistant Professor", image: VikramBalasubramanian },
+      { name: "Mr. Srinivas Bharadwaj R", designation: "Assistant Professor", image: SrinivasBharadwaj },
+      { name: "Mr. K Nanda Kishore Nadig", designation: "Assistant Professor", image: NandaKishore },
+      { name: "Mrs. Payal Jindal", designation: "Assistant Professor & TPO", image: PayalJindal }
+    ]
+  }
+];
+
+
 
   return (
     <div className="w-full">

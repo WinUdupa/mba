@@ -1,6 +1,10 @@
 import { motion, useInView } from "motion/react";
 import { useRef } from "react";
 
+import MayankSingh from "@/assets/Dr. Mayank Singh.jpg";
+import AvinashShrivastava from "@/assets/Dr. Avinash K Shrivastava.png";
+import SubhamSinghania from "@/assets/Dr. Subham Singhania.png";
+
 interface SpeakersPageProps {
   onNavigate: (page: string) => void;
 }
@@ -16,35 +20,36 @@ export function SpeakersPage({ onNavigate }: SpeakersPageProps) {
 
   
 
-  const workshopSpeakers = [
-    {
-      name: "Dr. Mayank Singh",
-      title: "Assistant Professor",
-      affiliation: "IIM Bangalore",
-      topic: "Research Methodology and Publication Strategies",
-      bio: "Dr. Singh specializes in research methodology and has guided numerous scholars in publishing their work in top-tier journals.",
-      expertise: ["Research Methods", "Academic Writing", "Publication Strategy"],
-      image: "/speakers/Dr. Mayank Singh.jpg"
-    },
-    {
-      name: "Dr. Avinash K Shrivastava",
-      title: "Associate Professor",
-      affiliation: "International Management Institute Kolkata",
-      topic: "Advanced Data Analytics for Management Research",
-      bio: "Dr. Shrivastava is an expert in quantitative research methods and data analytics with extensive experience in management research.",
-      expertise: ["Data Analytics", "Quantitative Methods", "Statistical Analysis"],
-      image: "/speakers/Dr. Avinash K Shrivastava.png"
-    },
-    {
-      name: "Dr. Subham Singhania",
-      title: "Assistant Professor",
-      affiliation: "FORE School of Management, New Delhi",
-      topic: "Case Study Development and Teaching",
-      bio: "Dr. Singhania specializes in case study methodology and has developed impactful case studies for management education.",
-      expertise: ["Case Study Research", "Teaching Pedagogy", "Management Education"],
-      image: "/speakers/Dr. Subham Singhania.png"
-    }
-  ];
+const workshopSpeakers = [
+  {
+    name: "Dr. Mayank Singh",
+    title: "Assistant Professor",
+    affiliation: "IIM Bangalore",
+    topic: "Research Methodology and Publication Strategies",
+    bio: "Dr. Singh specializes in research methodology and has guided numerous scholars in publishing their work in top-tier journals.",
+    expertise: ["Research Methods", "Academic Writing", "Publication Strategy"],
+    image: MayankSingh
+  },
+  {
+    name: "Dr. Avinash K Shrivastava",
+    title: "Associate Professor",
+    affiliation: "International Management Institute Kolkata",
+    topic: "Advanced Data Analytics for Management Research",
+    bio: "Dr. Shrivastava is an expert in quantitative research methods and data analytics with extensive experience in management research.",
+    expertise: ["Data Analytics", "Quantitative Methods", "Statistical Analysis"],
+    image: AvinashShrivastava
+  },
+  {
+    name: "Dr. Subham Singhania",
+    title: "Assistant Professor",
+    affiliation: "FORE School of Management, New Delhi",
+    topic: "Case Study Development and Teaching",
+    bio: "Dr. Singhania specializes in case study methodology and has developed impactful case studies for management education.",
+    expertise: ["Case Study Research", "Teaching Pedagogy", "Management Education"],
+    image: SubhamSinghania
+  }
+];
+
 
   return (
     <div className="w-full overflow-x-hidden">

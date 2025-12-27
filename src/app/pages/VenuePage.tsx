@@ -140,7 +140,7 @@ export function VenuePage({ onNavigate }: VenuePageProps) {
                     </p>
                     <p className="flex items-start gap-3">
                       <span className="text-[#F97316] text-[20px] sm:text-[24px]">✉️</span>
-                      <span>conference@bnmit.ac.in</span>
+                      <span>bnmitconference@bnmit.in</span>
                     </p>
                   </div>
                   <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-4">

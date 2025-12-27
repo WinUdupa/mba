@@ -4,6 +4,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
+import UPI from "@/assets/UPICODE.png";
 
 interface RegistrationPageProps {
   onNavigate: (page: string) => void;
@@ -536,7 +537,7 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
               <div className="mt-6 flex justify-center">
                 <div className="bg-white rounded-xl p-5 sm:p-6 shadow-lg inline-block">
                   <img 
-                    src="/UPICODE.png" 
+                    src={UPI} 
                     alt="UPI QR Code for Payment" 
                     className="w-[280px] sm:w-[320px] lg:w-[360px] h-auto mx-auto"
                   />

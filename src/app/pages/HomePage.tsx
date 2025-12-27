@@ -15,8 +15,7 @@ const conferenceInfo = {
   subtitle: "Best Practices in Technology and Management for a Digital Era",
   dates: "April 9-11, 2026",
   preConference: "Pre-Conference Workshop: April 8, 2026",
-  venue: "BNM Institute of Technology, Bengaluru",
-  mode: "Hybrid Mode (In-Person & Virtual)",
+  venue: "BNM Institute of Technology, Bengaluru"
 };
 
 const importantDates = [
@@ -273,8 +272,7 @@ const aboutContent = {
       items: [
         { label: "Conference Dates", value: "April 9–11, 2026" },
         { label: "Pre-Conference", value: "April 8, 2026" },
-        { label: "Venue", value: "BNMIT, Bengaluru" },
-        { label: "Format", value: "Hybrid" },
+        { label: "Venue", value: "BNMIT, Bengaluru" }
       ]
     }
   },
@@ -683,10 +681,10 @@ const submissionGuidelinesData = [
         "Include figures, tables, graphs, appendices, and references using standard citation formats.",
         "Submit as a single PDF document (.pdf format only).",
         "Maximum of 3 submissions per participant allowed.",
-        "Only one author or co-author may present a paper (Hybrid Mode) at the conference.",
+        "Only one author or co-author may present a paper at the conference.",
         "Certificates for co-authors (not registered) will be provided upon payment of ₹500 per co-author."
       ],
-      note: "All submissions should be emailed to: icsar2026@bnmit.ac.in"
+      
     }
   },
   {
@@ -961,7 +959,7 @@ function SubmissionGuidelinesSection() {
         {/* Submit Button */}
         <div className="text-center mt-10">
           <a
-            href="mailto:icsar2026@bnmit.ac.in"
+            href=""
             className="inline-flex items-center gap-2 px-6 py-3.5 bg-[#000066] text-white text-[14px] md:text-[15px] font-semibold rounded-lg hover:bg-[#000055] transition-colors duration-200"
           >
             <Mail className="w-4 h-4" />
@@ -1030,11 +1028,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 <MapPin className="w-5 h-5 text-[#f7931e]" />
                 BNMIT, Bengaluru
               </span>
-              <span className="text-white/40">|</span>
-              <span className="flex items-center gap-2">
-                <Globe className="w-5 h-5 text-[#f7931e]" />
-                Hybrid
-              </span>
+
             </div>
 
             {/* CTA Button */}
@@ -1351,6 +1345,15 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           </div>
         </div>
       </section>
+      {/* CMT Acknowledgment Footer */}
+    <footer className="cmt-acknowledgment">
+      <div className="cmt-container">
+        <div className="cmt-title">Submission Platform Acknowledgment</div>
+        <p>
+          The Microsoft CMT service was used for managing the peer-reviewing process for this conference. This service was provided for free by Microsoft and they bore all expenses, including costs for Azure cloud services as well as for software development and support.
+        </p>
+      </div>
+    </footer>
     </div>
   );
 }

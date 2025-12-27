@@ -53,30 +53,7 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
     }
   ];
 
-  const contactInfo = [
-    {
-      title: "General Inquiries",
-      name: "Dr. Suresh Babu",
-      designation: "Conference Chair",
-      email: "conference@bnmit.ac.in",
-      phone: "+91 80 2861 1426"
-    },
-    {
-      title: "Technical/Paper Submission",
-      name: "Dr. Amit Verma",
-      designation: "Technical Chair",
-      email: "papers@bnmit.ac.in",
-      phone: "+91 80 2861 1427"
-    },
-    {
-      title: "Registration & Finance",
-      name: "Dr. Prakash Shetty",
-      designation: "Registration Chair",
-      email: "registration@bnmit.ac.in",
-      phone: "+91 80 2861 1428"
-    }
-  ];
-
+  
   const handleInputChange = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
   };
@@ -112,31 +89,7 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
       {/* Contact Info Cards */}
       <section className="py-16 sm:py-20 lg:py-24 bg-white">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-10 sm:mb-12 lg:mb-16">
-            {contactInfo.map((info, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className="bg-gradient-to-br from-[#F8FAFC] to-white rounded-xl sm:rounded-2xl p-5 sm:p-6 lg:p-8 border-2 border-[#E2E8F0] shadow-lg hover:border-[#F97316] hover:shadow-2xl transition-all duration-300"
-              >
-                <div className="bg-gradient-to-br from-[#0B1F3A] to-[#1E4ED8] rounded-lg sm:rounded-xl w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 flex items-center justify-center mb-4 sm:mb-5 lg:mb-6">
-                  <span className="text-white text-[20px] sm:text-[24px] lg:text-[28px]">📧</span>
-                </div>
-                <h3 className="text-[#0B1F3A] text-[16px] sm:text-[18px] lg:text-[20px] font-['Montserrat',sans-serif] font-bold mb-3 sm:mb-4">
-                  {info.title}
-                </h3>
-                <p className="text-[#0B1F3A] text-[14px] sm:text-[16px] lg:text-[18px] font-semibold mb-1">{info.name}</p>
-                <p className="text-[#475569] text-[12px] sm:text-[13px] lg:text-[14px] mb-3 sm:mb-4">{info.designation}</p>
-                <div className="space-y-2">
-                  <p className="text-[#1E4ED8] text-[12px] sm:text-[13px] lg:text-[14px] font-medium">✉️ {info.email}</p>
-                  <p className="text-[#475569] text-[12px] sm:text-[13px] lg:text-[14px]">📞 {info.phone}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+
 
           {/* Institution Address */}
           <motion.div
@@ -154,13 +107,16 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
               Bangalore - 560070, Karnataka, India
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
-              <motion.button
+              <motion.a
+                href="https://maps.app.goo.gl/TTJqSdLEynZtzHoG6"
+                target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
                 className="bg-[#F97316] text-white px-6 sm:px-8 py-3 rounded-lg font-semibold text-[14px] sm:text-[16px] shadow-lg hover:bg-[#ea580c] transition-colors"
               >
                 Get Directions
-              </motion.button>
+              </motion.a>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.98 }}
@@ -297,7 +253,7 @@ export function ContactPage({ onNavigate }: ContactPageProps) {
                 Can't find what you're looking for?
               </p>
               <p className="text-[#0B1F3A] text-[13px] sm:text-[14px] lg:text-[16px]">
-                Contact us at <a href="mailto:conference@bnmit.ac.in" className="text-[#1E4ED8] font-semibold hover:underline">conference@bnmit.ac.in</a>
+                Contact us at <a href="mailto:bnmitconference@bnmit.in" className="text-[#1E4ED8] font-semibold hover:underline">bnmitconference@bnmit.in</a>
               </p>
             </div>
           </motion.div>

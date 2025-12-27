@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { BrowserRouter, Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { Layout } from "./components/Layout";
 import HomePage from "./pages/HomePage";
 import { RegistrationPage } from "./pages/RegistrationPage";
@@ -7,36 +8,56 @@ import { CommitteesPage } from "./pages/CommitteesPage";
 import { ContactPage } from "./pages/ContactPage";
 import { VenuePage } from "./pages/VenuePage";
 
-export default function App() {
-  const [currentPage, setCurrentPage] = useState("home");
+function AppRoutes() {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleNavigate = (page: string) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  // Map path to currentPage for Layout highlighting
+  const pathToPage: Record<string, string> = {
+    "/": "home",
+    "/registration": "registration",
+    "/speakers": "speakers",
+    "/committees": "committees",
+    "/contact": "contact",
+    "/venue": "venue",
   };
+  const currentPage = pathToPage[location.pathname] || "home";
 
-  const renderPage = () => {
-    switch (currentPage) {
-      case "home":
-        return <HomePage onNavigate={handleNavigate} />;
-      case "registration":
-        return <RegistrationPage onNavigate={handleNavigate} />;
-      case "speakers":
-        return <SpeakersPage onNavigate={handleNavigate} />;
-      case "committees":
-        return <CommitteesPage onNavigate={handleNavigate} />;
-      case "contact":
-        return <ContactPage onNavigate={handleNavigate} />;
-      case "venue":
-        return <VenuePage onNavigate={handleNavigate} />;
-      default:
-        return <HomePage onNavigate={handleNavigate} />;
-    }
+  // onNavigate handler for Layout and children
+  const handleNavigate = (page: string) => {
+    const pageToPath: Record<string, string> = {
+      home: "/",
+      registration: "/registration",
+      speakers: "/speakers",
+      committees: "/committees",
+      contact: "/contact",
+      venue: "/venue",
+    };
+    const path = pageToPath[page] || "/";
+    navigate(path);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
     <Layout currentPage={currentPage} onNavigate={handleNavigate}>
-      {renderPage()}
+      <Routes>
+        <Route path="/" element={<HomePage onNavigate={handleNavigate} />} />
+        <Route path="/registration" element={<RegistrationPage onNavigate={handleNavigate} />} />
+        <Route path="/speakers" element={<SpeakersPage onNavigate={handleNavigate} />} />
+        <Route path="/committees" element={<CommitteesPage onNavigate={handleNavigate} />} />
+        <Route path="/contact" element={<ContactPage onNavigate={handleNavigate} />} />
+        <Route path="/venue" element={<VenuePage onNavigate={handleNavigate} />} />
+        {/* Redirect unknown routes to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </Layout>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }
