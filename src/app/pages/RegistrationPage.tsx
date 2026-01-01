@@ -3,52 +3,34 @@ import { useRef, useState, useEffect } from "react";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
 import UPI from "@/assets/UPICODE.png";
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface RegistrationPageProps {
   onNavigate: (page: string) => void;
 }
 
-// Validation helper functions
 const validateEmail = (email: string): { isValid: boolean; error?: string } => {
   if (!email || email.trim() === '') {
     return { isValid: false, error: 'Email address is required.' };
   }
-
-  // Strict email regex
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailRegex.test(email)) {
-    return { isValid: false, error: 'Please enter a valid email address (e.g., name@example.com).' };
+    return { isValid: false, error: 'Please enter a valid email address.' };
   }
-
-  // Domain sanity validation for common providers
-  const lowerEmail = email.toLowerCase();
-  const domainPart = lowerEmail.split('@')[1];
-  if (domainPart) {
-    const domainName = domainPart.split('.')[0];
-    const tld = domainPart.split('.').pop() || '';
-    
-    const commonProviders = ['gmail', 'yahoo', 'outlook', 'hotmail'];
-    if (commonProviders.includes(domainName) && tld.length < 3) {
-      return { 
-        isValid: false, 
-        error: `Please enter a valid email address (e.g., name@${domainName}.com).` 
-      };
-    }
-  }
-
   return { isValid: true };
 };
 
 const validatePhone = (phone: string): boolean => {
-  // Must start with + and have 10-15 digits
   const phoneRegex = /^\+[0-9]{10,15}$/;
   const cleanedPhone = phone.replace(/[\s-]/g, '');
   return phoneRegex.test(cleanedPhone);
 };
 
-// Field error type
 interface FieldErrors {
   name?: string;
   nationality?: string;
@@ -65,12 +47,14 @@ interface FieldErrors {
   paymentProof?: string;
 }
 
-// Touched fields type
 interface TouchedFields {
   [key: string]: boolean;
 }
 
 export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
+  // Fields that can be edited before email verification
+  const preVerificationFields = ['name', 'nationality', 'phone'];
+
   const [formData, setFormData] = useState({
     name: "",
     nationality: "",
@@ -93,11 +77,74 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
   const [shakeField, setShakeField] = useState<string | null>(null);
   const [isFormValid, setIsFormValid] = useState(false);
 
-  const formRef = useRef<HTMLFormElement>(null);
-  const fieldRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  // Email verification states
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifyMessage, setVerifyMessage] = useState('');
+  const [verifyStep, setVerifyStep] = useState<'idle' | 'sent' | 'verified'>('idle');
 
+  const formRef = useRef<HTMLDivElement>(null);
+  const fieldRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const contentRef = useRef(null);
   const isInView = useInView(contentRef, { once: true, amount: 0.2 });
+
+  // Check for magic link in URL
+  useEffect(() => {
+    const checkMagicLink = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        setEmailVerified(true);
+        setVerifyStep('verified');
+        setFormData(prev => ({ ...prev, email: session.user.email || '' }));
+        setTouched(prev => ({ ...prev, email: true }));
+      }
+    };
+    checkMagicLink();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session && event === 'SIGNED_IN') {
+        setEmailVerified(true);
+        setVerifyStep('verified');
+        setFormData(prev => ({ ...prev, email: session.user.email || '' }));
+        setTouched(prev => ({ ...prev, email: true }));
+        setVerifyMessage('Email verified successfully!');
+      }
+    });
+
+    return () => subscription?.unsubscribe();
+  }, []);
+
+  const handleSendMagicLink = async () => {
+    setIsVerifying(true);
+    setVerifyMessage('');
+
+    const emailValidation = validateEmail(formData.email);
+    if (!emailValidation.isValid) {
+      setVerifyMessage(emailValidation.error || '');
+      setIsVerifying(false);
+      return;
+    }
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: formData.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}${window.location.pathname}`
+        }
+      });
+
+      if (error) {
+        setVerifyMessage(error.message);
+      } else {
+        setVerifyMessage('Magic link sent! Check your email and click the link to verify.');
+        setVerifyStep('sent');
+      }
+    } catch (err) {
+      setVerifyMessage('An error occurred. Please try again.');
+    } finally {
+      setIsVerifying(false);
+    }
+  };
 
   const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
@@ -140,19 +187,15 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
 
   const handleInputChange = (field: string, value: any) => {
     setFormData({ ...formData, [field]: value });
-    // Mark field as touched (but for email, only mark on blur)
     if (!touched[field] && field !== 'email') {
       setTouched({ ...touched, [field]: true });
     }
-    // For email: clear errors while typing, don't validate until blur
     if (field === 'email') {
-      // Clear the error when user starts typing
       if (errors.email) {
         setErrors(prev => ({ ...prev, email: undefined }));
       }
-      return; // Don't validate email on every keystroke
+      return;
     }
-    // Validate other fields on change
     validateField(field, value);
   };
 
@@ -245,7 +288,6 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
     const newErrors: FieldErrors = {};
     let isValid = true;
 
-    // Validate all fields
     Object.keys(formData).forEach(field => {
       const error = validateField(field, formData[field as keyof typeof formData]);
       if (error) {
@@ -254,7 +296,6 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
       }
     });
 
-    // Mark all fields as touched
     const allTouched: TouchedFields = {};
     Object.keys(formData).forEach(field => {
       allTouched[field] = true;
@@ -265,9 +306,13 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
     return isValid;
   };
 
-  // Check form validity on every change
   useEffect(() => {
     const checkValidity = () => {
+      if (!emailVerified) {
+        setIsFormValid(false);
+        return;
+      }
+
       const requiredFields = ['name', 'nationality', 'phone', 'email', 'affiliation', 'placeOfAffiliation', 'paperTitle', 'trackNumber', 'paperId', 'amountPaid', 'paymentAccount', 'transactionId', 'paymentProof'];
       
       for (const field of requiredFields) {
@@ -278,7 +323,6 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
         }
       }
       
-      // Check specific validations
       const emailValidation = validateEmail(formData.email);
       if (!emailValidation.isValid || !validatePhone(formData.phone)) {
         setIsFormValid(false);
@@ -289,19 +333,65 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
     };
     
     checkValidity();
-  }, [formData]);
+  }, [formData, emailVerified]);
+
+  const isFieldDisabled = (field: string): boolean => {
+    return !emailVerified && !preVerificationFields.includes(field);
+  };
+
+  const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      // Validate file size (max 5MB)
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, paymentProof: 'File size must be less than 5MB' }));
+      if (file.size > MAX_FILE_SIZE) {
+        setErrors(prev => ({ ...prev, paymentProof: `File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB` }));
         return;
       }
       setFormData({ ...formData, paymentProof: file });
       setErrors(prev => ({ ...prev, paymentProof: undefined }));
       setTouched({ ...touched, paymentProof: true });
+    }
+  };
+
+  const uploadFileToSupabase = async (file: File, userEmail: string): Promise<string | null> => {
+    try {
+      // Generate unique filename: email_timestamp_originalname
+      const timestamp = Date.now();
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${userEmail.replace('@', '_').replace('.', '_')}_${timestamp}.${fileExt}`;
+      const filePath = `payment-proofs/${fileName}`;
+
+      // Upload file to Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('conference-registration') // bucket name
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (error) {
+        console.error('Upload error:', error);
+        return null;
+      }
+
+      return filePath; // Return the path for storing in database
+    } catch (err) {
+      console.error('File upload failed:', err);
+      return null;
+    }
+  };
+
+  const getFileDownloadUrl = async (filePath: string): Promise<string | null> => {
+    try {
+      const { data } = supabase.storage
+        .from('conference-registration')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (err) {
+      console.error('Failed to get file URL:', err);
+      return null;
     }
   };
 
@@ -311,14 +401,12 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
     const isValid = validateAllFields();
     
     if (!isValid) {
-      // Find first error field and scroll to it
       const errorFields = Object.keys(errors).filter(key => errors[key as keyof FieldErrors]);
       if (errorFields.length > 0) {
         const firstErrorField = errorFields[0];
         const fieldElement = fieldRefs.current[firstErrorField];
         if (fieldElement) {
           fieldElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          // Trigger shake animation
           setShakeField(firstErrorField);
           setTimeout(() => setShakeField(null), 500);
         }
@@ -327,12 +415,88 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
       return;
     }
     
-    // Success
-    alert("Registration submitted successfully! We will verify your payment and send confirmation to your email.");
-    setIsSubmitting(false);
+    // Upload file and save registration data
+    uploadAndSaveRegistration();
   };
 
-  // Get input class based on validation state
+  const uploadAndSaveRegistration = async () => {
+    try {
+      let paymentProofPath = null;
+
+      // Upload payment proof file if exists
+      if (formData.paymentProof) {
+        paymentProofPath = await uploadFileToSupabase(formData.paymentProof, formData.email);
+        
+        if (!paymentProofPath) {
+          setErrors(prev => ({ ...prev, paymentProof: 'Failed to upload file. Please try again.' }));
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
+      // Split name into first and last name
+      const nameParts = formData.name.trim().split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      // Save registration data to Supabase database
+      const { data, error } = await supabase
+        .from('conference_registrations')
+        .insert([
+          {
+            first_name: firstName,
+            last_name: lastName,
+            email: formData.email,
+            phone: formData.phone,
+            institution: formData.affiliation,
+            place_of_affiliation: formData.placeOfAffiliation,
+            country: formData.nationality,
+            paper_title: formData.paperTitle,
+            paper_id: formData.paperId,
+            track_number: formData.trackNumber,
+            payment_status: 'pending',
+            amount_paid: formData.amountPaid,
+            payment_account: formData.paymentAccount,
+            transaction_id: formData.transactionId,
+            payment_proof_path: paymentProofPath
+          }
+        ]);
+
+      if (error) {
+        console.error('Database error:', error);
+        alert('Error saving registration. Please try again.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      alert("Registration submitted successfully! We will verify your payment and send confirmation to your email.");
+      setIsSubmitting(false);
+
+      // Reset form
+      setFormData({
+        name: "",
+        nationality: "",
+        phone: "",
+        email: "",
+        affiliation: "",
+        placeOfAffiliation: "",
+        paperTitle: "",
+        trackNumber: "",
+        paperId: "",
+        amountPaid: "",
+        paymentAccount: "",
+        transactionId: "",
+        paymentProof: null
+      });
+      setEmailVerified(false);
+      setVerifyStep('idle');
+    } catch (err) {
+      console.error('Registration error:', err);
+      alert('An error occurred. Please try again.');
+      setIsSubmitting(false);
+    }
+  };
+
   const getInputClassName = (field: string, baseClass: string = "h-10"): string => {
     const hasError = touched[field] && errors[field as keyof FieldErrors];
     const isValid = touched[field] && !errors[field as keyof FieldErrors] && formData[field as keyof typeof formData];
@@ -352,7 +516,6 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
     return className;
   };
 
-  // Get select trigger class based on validation state
   const getSelectClassName = (field: string): string => {
     const hasError = touched[field] && errors[field as keyof FieldErrors];
     const isValid = touched[field] && !errors[field as keyof FieldErrors] && formData[field as keyof typeof formData];
@@ -372,12 +535,11 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
     return className;
   };
 
-  // Error message component
   const ErrorMessage = ({ field }: { field: keyof FieldErrors }) => {
     if (!touched[field] || !errors[field]) return null;
     
     return (
-      <p className="text-[#E53935] text-[11px] sm:text-[12px] mt-1 flex items-center gap-1" role="alert" aria-live="polite">
+      <p className="text-[#E53935] text-[11px] sm:text-[12px] mt-1 flex items-center gap-1" role="alert">
         <svg className="w-3 h-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
           <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
         </svg>
@@ -386,7 +548,6 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
     );
   };
 
-  // Valid indicator component
   const ValidIndicator = ({ field }: { field: string }) => {
     const isValid = touched[field] && !errors[field as keyof FieldErrors] && formData[field as keyof typeof formData];
     
@@ -472,171 +633,6 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                 </motion.div>
               ))}
             </div>
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mt-4 bg-[#FFF7ED] border-l-4 border-[#F97316] rounded-md p-4"
-            >
-              <p className="text-[#0F172A] text-[13px] sm:text-[14px]">
-                <strong>Note:</strong> Registration fee includes conference kit, meals, and access to all sessions. At least one author per accepted paper must register. Certificates for co-authors (not registered) will be provided upon payment of Rs. 500 per co-author.
-              </p>
-            </motion.div>
-
-            {/* Bank Account Details */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="mt-6 bg-gradient-to-br from-[#0B1F3A] to-[#1E4ED8] rounded-xl p-6 sm:p-8 text-white"
-            >
-              <h3 className="text-[20px] sm:text-[24px] font-['Montserrat',sans-serif] font-bold mb-6">
-                Bank Account Details
-              </h3>
-              
-              {/* Bank Details Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">Account Name</p>
-                  <p className="text-white text-[15px] sm:text-[16px] font-semibold">BNMIT-MBA</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">Bank Name</p>
-                  <p className="text-white text-[15px] sm:text-[16px] font-semibold">Canara Bank</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">Account Number</p>
-                  <p className="text-white text-[15px] sm:text-[16px] font-semibold">1147101031035</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">IFSC Code</p>
-                  <p className="text-white text-[15px] sm:text-[16px] font-semibold">CNRB0001147</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">Branch Code</p>
-                  <p className="text-white text-[15px] sm:text-[16px] font-semibold">1147</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">MICR Code</p>
-                  <p className="text-white text-[15px] sm:text-[16px] font-semibold">560015006</p>
-                </div>
-                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 sm:col-span-2">
-                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">Branch Address</p>
-                  <p className="text-white text-[14px] sm:text-[15px] font-semibold">24/25, 27th Cross, Sevakshetra Complex, Banashankari II Stage, Bangalore - 560070</p>
-                </div>
-              </div>
-              
-              {/* UPI Note */}
-              <div className="mt-6 bg-[#F97316] rounded-lg p-4">
-                <p className="text-white text-[14px] sm:text-[15px] font-medium">
-                  <strong>Note:</strong> While paying through UPI, please add a note as <span className="underline font-bold">'Towards BNMIT Conference 2026'</span>
-                </p>
-              </div>
-              
-              {/* QR Code - Below Bank Details */}
-              <div className="mt-6 flex justify-center">
-                <div className="bg-white rounded-xl p-5 sm:p-6 shadow-lg inline-block">
-                  <img 
-                    src={UPI} 
-                    alt="UPI QR Code for Payment" 
-                    className="w-[280px] sm:w-[320px] lg:w-[360px] h-auto mx-auto"
-                  />
-                  <p className="text-[#0B1F3A] text-[16px] sm:text-[18px] font-bold mt-4 text-center">Scan to Pay via UPI</p>
-                  <p className="text-[#475569] text-[13px] sm:text-[14px] text-center mt-1">Works with GPay, PhonePe, Paytm & all UPI apps</p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Cancellation Policy */}
-      <section className="py-10 sm:py-12 bg-[#F8FAFC] border-t border-[#E2E8F0]">
-        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <h2 className="text-[#0B1F3A] text-[24px] sm:text-[28px] lg:text-[32px] font-['Montserrat',sans-serif] font-bold mb-6 text-center">
-              Cancellation & <span className="text-[#F97316]">Refund Policy</span>
-            </h2>
-            
-            <div className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-sm">
-              {/* Refund Policy Row */}
-              <div className="flex flex-col sm:flex-row border-b border-[#E2E8F0]">
-                <div className="sm:w-1/4 bg-[#0B1F3A] px-6 py-5 flex items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </div>
-                    <span className="text-white font-bold text-[16px] sm:text-[18px]">Refund Policy</span>
-                  </div>
-                </div>
-                <div className="sm:w-3/4 px-6 py-5 space-y-3">
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-[#10B981] flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <p className="text-[#334155] text-[14px] sm:text-[15px]">
-                      <span className="font-bold text-[#0B1F3A]">Before April 05, 2026:</span> Full refund will be provided (₹1,000 cancellation charges applicable)
-                    </p>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-[#EF4444] flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </div>
-                    <p className="text-[#334155] text-[14px] sm:text-[15px]">
-                      <span className="font-bold text-[#0B1F3A]">After April 05, 2026:</span> No refund will be provided
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Notification Row */}
-              <div className="flex flex-col sm:flex-row border-b border-[#E2E8F0]">
-                <div className="sm:w-1/4 bg-[#0B1F3A] px-6 py-5 flex items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <span className="text-white font-bold text-[16px] sm:text-[18px]">Contact</span>
-                  </div>
-                </div>
-                <div className="sm:w-3/4 px-6 py-5 flex items-center">
-                  <p className="text-[#334155] text-[14px] sm:text-[15px]">
-                    Submit cancellation requests in writing to <a href="mailto:bnmitconference@bnmit.in" className="text-[#1E4ED8] font-bold hover:underline">bnmitconference@bnmit.in</a>
-                  </p>
-                </div>
-              </div>
-
-              {/* No-Show Row */}
-              <div className="flex flex-col sm:flex-row">
-                <div className="sm:w-1/4 bg-[#0B1F3A] px-6 py-5 flex items-center">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                      </svg>
-                    </div>
-                    <span className="text-white font-bold text-[16px] sm:text-[18px]">No-Show</span>
-                  </div>
-                </div>
-                <div className="sm:w-3/4 px-6 py-5 flex items-center">
-                  <p className="text-[#334155] text-[14px] sm:text-[15px]">
-                    No refunds will be provided for attendees who fail to attend the conference without prior cancellation
-                  </p>
-                </div>
-              </div>
-            </div>
           </motion.div>
         </div>
       </section>
@@ -660,12 +656,12 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
             Registration <span className="text-[#F97316]">Form</span>
           </motion.h2>
 
-          {/* Form Card */}
           <motion.div
             variants={fadeInUp}
             className="bg-[#F8FAFC] rounded-lg p-5 sm:p-6 lg:p-8 border border-[#E2E8F0]"
+            ref={formRef}
           >
-            <form onSubmit={(e) => { e.preventDefault(); handleSubmit(); }} className="space-y-5">
+            <div className="space-y-5">
               {/* Personal Information Section */}
               <div className="border-b border-[#E2E8F0] pb-5">
                 <h3 className="text-[#0B1F3A] text-[16px] sm:text-[18px] font-['Montserrat',sans-serif] font-bold mb-4">
@@ -682,8 +678,7 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                         onBlur={() => handleBlur("name")}
                         placeholder="Enter your full name"
                         className={getInputClassName("name")}
-                        aria-invalid={touched.name && !!errors.name}
-                        aria-describedby={errors.name ? "name-error" : undefined}
+                        disabled={isFieldDisabled("name")}
                       />
                       <ValidIndicator field="name" />
                     </div>
@@ -699,8 +694,7 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                         onBlur={() => handleBlur("nationality")}
                         placeholder="e.g., Indian"
                         className={getInputClassName("nationality")}
-                        aria-invalid={touched.nationality && !!errors.nationality}
-                        aria-describedby={errors.nationality ? "nationality-error" : undefined}
+                        disabled={isFieldDisabled("nationality")}
                       />
                       <ValidIndicator field="nationality" />
                     </div>
@@ -717,8 +711,7 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                         onBlur={() => handleBlur("phone")}
                         placeholder="+91 9876543210"
                         className={getInputClassName("phone")}
-                        aria-invalid={touched.phone && !!errors.phone}
-                        aria-describedby={errors.phone ? "phone-error" : undefined}
+                        disabled={isFieldDisabled("phone")}
                       />
                       <ValidIndicator field="phone" />
                     </div>
@@ -726,19 +719,53 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                   </div>
                   <div className="space-y-1.5 md:col-span-2" ref={(el) => { fieldRefs.current['email'] = el; }}>
                     <Label htmlFor="email" className="text-[13px]">Email ID *</Label>
-                    <div className="relative">
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleInputChange("email", e.target.value)}
-                        onBlur={() => handleBlur("email")}
-                        placeholder="your.email@example.com"
-                        className={getInputClassName("email")}
-                        aria-invalid={touched.email && !!errors.email}
-                        aria-describedby={errors.email ? "email-error" : undefined}
-                      />
-                      <ValidIndicator field="email" />
+                    <div className="space-y-2">
+                      <div className="relative">
+                        <Input
+                          id="email"
+                          type="email"
+                          value={formData.email}
+                          onChange={(e) => handleInputChange("email", e.target.value)}
+                          onBlur={() => handleBlur("email")}
+                          placeholder="your.email@example.com"
+                          className={getInputClassName("email")}
+                          disabled={emailVerified}
+                        />
+                        <ValidIndicator field="email" />
+                      </div>
+                      
+                      {!emailVerified && (
+                        <motion.button
+                          onClick={handleSendMagicLink}
+                          disabled={isVerifying || !formData.email || !!errors.email}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          className="w-full py-2.5 px-4 rounded-md font-semibold text-[13px] transition-all duration-200 bg-[#1E4ED8] text-white hover:bg-[#1a3eb3] disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        >
+                          {isVerifying ? 'Sending...' : verifyStep === 'sent' ? 'Link Sent - Check Email' : 'Verify Email with Magic Link'}
+                        </motion.button>
+                      )}
+
+                      {verifyMessage && (
+                        <div className={`p-3 rounded-md text-[12px] ${
+                          verifyStep === 'verified' 
+                            ? 'bg-[#D1FAE5] text-[#065F46] border border-[#6EE7B7]' 
+                            : verifyStep === 'sent'
+                              ? 'bg-[#DBEAFE] text-[#1E40AF] border border-[#93C5FD]'
+                              : 'bg-[#FEE2E2] text-[#991B1B] border border-[#FECACA]'
+                        }`}>
+                          {verifyMessage}
+                        </div>
+                      )}
+
+                      {emailVerified && (
+                        <div className="flex items-center gap-2 text-[#10B981] text-[12px] font-medium">
+                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                          </svg>
+                          Email verified successfully!
+                        </div>
+                      )}
                     </div>
                     <ErrorMessage field="email" />
                   </div>
@@ -752,8 +779,7 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                         onBlur={() => handleBlur("affiliation")}
                         placeholder="e.g., BNM Institute of Technology"
                         className={getInputClassName("affiliation")}
-                        aria-invalid={touched.affiliation && !!errors.affiliation}
-                        aria-describedby={errors.affiliation ? "affiliation-error" : undefined}
+                        disabled={isFieldDisabled("affiliation")}
                       />
                       <ValidIndicator field="affiliation" />
                     </div>
@@ -769,8 +795,7 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                         onBlur={() => handleBlur("placeOfAffiliation")}
                         placeholder="e.g., Bangalore, Karnataka, India"
                         className={getInputClassName("placeOfAffiliation")}
-                        aria-invalid={touched.placeOfAffiliation && !!errors.placeOfAffiliation}
-                        aria-describedby={errors.placeOfAffiliation ? "placeOfAffiliation-error" : undefined}
+                        disabled={isFieldDisabled("placeOfAffiliation")}
                       />
                       <ValidIndicator field="placeOfAffiliation" />
                     </div>
@@ -795,8 +820,7 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                         onBlur={() => handleBlur("paperTitle")}
                         placeholder="Enter your paper title"
                         className={getInputClassName("paperTitle")}
-                        aria-invalid={touched.paperTitle && !!errors.paperTitle}
-                        aria-describedby={errors.paperTitle ? "paperTitle-error" : undefined}
+                        disabled={isFieldDisabled("paperTitle")}
                       />
                       <ValidIndicator field="paperTitle" />
                     </div>
@@ -810,11 +834,9 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                         handleInputChange("trackNumber", value);
                         setTouched({ ...touched, trackNumber: true });
                       }}
+                      disabled={isFieldDisabled("trackNumber")}
                     >
-                      <SelectTrigger 
-                        className={getSelectClassName("trackNumber")}
-                        aria-invalid={touched.trackNumber && !!errors.trackNumber}
-                      >
+                      <SelectTrigger className={getSelectClassName("trackNumber")} disabled={isFieldDisabled("trackNumber")}>
                         <SelectValue placeholder="Select research track" />
                       </SelectTrigger>
                       <SelectContent>
@@ -838,8 +860,7 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                         onBlur={() => handleBlur("paperId")}
                         placeholder="e.g., ICSAR-2026-001"
                         className={getInputClassName("paperId")}
-                        aria-invalid={touched.paperId && !!errors.paperId}
-                        aria-describedby={errors.paperId ? "paperId-error" : undefined}
+                        disabled={isFieldDisabled("paperId")}
                       />
                       <ValidIndicator field="paperId" />
                     </div>
@@ -862,11 +883,9 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                         handleInputChange("amountPaid", value);
                         setTouched({ ...touched, amountPaid: true });
                       }}
+                      disabled={isFieldDisabled("amountPaid")}
                     >
-                      <SelectTrigger 
-                        className={getSelectClassName("amountPaid")}
-                        aria-invalid={touched.amountPaid && !!errors.amountPaid}
-                      >
+                      <SelectTrigger className={getSelectClassName("amountPaid")} disabled={isFieldDisabled("amountPaid")}>
                         <SelectValue placeholder="Select the amount you paid" />
                       </SelectTrigger>
                       <SelectContent>
@@ -888,8 +907,7 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                           onBlur={() => handleBlur("paymentAccount")}
                           placeholder="e.g., 1234567890 or yourname@upi"
                           className={getInputClassName("paymentAccount")}
-                          aria-invalid={touched.paymentAccount && !!errors.paymentAccount}
-                          aria-describedby={errors.paymentAccount ? "paymentAccount-error" : undefined}
+                          disabled={isFieldDisabled("paymentAccount")}
                         />
                         <ValidIndicator field="paymentAccount" />
                       </div>
@@ -905,8 +923,7 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                           onBlur={() => handleBlur("transactionId")}
                           placeholder="Enter your payment transaction ID"
                           className={getInputClassName("transactionId")}
-                          aria-invalid={touched.transactionId && !!errors.transactionId}
-                          aria-describedby={errors.transactionId ? "transactionId-error" : undefined}
+                          disabled={isFieldDisabled("transactionId")}
                         />
                         <ValidIndicator field="transactionId" />
                       </div>
@@ -915,24 +932,22 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                   </div>
                   <div className="space-y-1.5" ref={(el) => { fieldRefs.current['paymentProof'] = el; }}>
                     <Label htmlFor="paymentProof" className="text-[13px]">Upload Proof of Payment *</Label>
-                    <div className={`relative ${touched.paymentProof && errors.paymentProof ? 'border-[#E53935] bg-[#FFF5F5]' : ''} rounded-md`}>
-                      <input
-                        type="file"
-                        id="paymentProof"
-                        accept="image/*,.pdf"
-                        onChange={handleFileChange}
-                        className={`block w-full text-[13px] text-[#475569] file:mr-3 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-[13px] file:font-semibold file:bg-[#1E4ED8] file:text-white hover:file:bg-[#1a3eb3] file:cursor-pointer cursor-pointer border rounded-md transition-colors duration-200 ${
-                          touched.paymentProof && errors.paymentProof 
-                            ? 'border-[#E53935] bg-[#FFF5F5]' 
-                            : touched.paymentProof && formData.paymentProof 
-                              ? 'border-[#10B981]' 
-                              : 'border-[#E2E8F0]'
-                        }`}
-                        aria-invalid={touched.paymentProof && !!errors.paymentProof}
-                      />
-                    </div>
+                    <input
+                      type="file"
+                      id="paymentProof"
+                      accept="image/*,.pdf"
+                      onChange={handleFileChange}
+                      disabled={isFieldDisabled("paymentProof")}
+                      className={`block w-full text-[13px] text-[#475569] file:mr-3 file:py-2.5 file:px-4 file:rounded-md file:border-0 file:text-[13px] file:font-semibold file:bg-[#1E4ED8] file:text-white hover:file:bg-[#1a3eb3] file:cursor-pointer cursor-pointer border rounded-md transition-colors duration-200 ${
+                        touched.paymentProof && errors.paymentProof 
+                          ? 'border-[#E53935] bg-[#FFF5F5]' 
+                          : touched.paymentProof && formData.paymentProof 
+                            ? 'border-[#10B981]' 
+                            : 'border-[#E2E8F0]'
+                      } ${isFieldDisabled("paymentProof") ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    />
                     <p className="text-[11px] text-[#475569]">
-                      Accepted: JPG, PNG, PDF (Max 5MB)
+                      Accepted: JPG, PNG, PDF (Max 50MB)
                     </p>
                     <ErrorMessage field="paymentProof" />
                     {formData.paymentProof && !errors.paymentProof && (
@@ -951,28 +966,26 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
               <div className="pt-2">
                 <motion.button
                   type="button"
-                  disabled
-                  className="w-full py-3.5 rounded-md font-semibold text-[15px] transition-all duration-200 bg-gray-300 text-gray-500 cursor-not-allowed"
+                  disabled={!isFormValid || !emailVerified}
+                  whileHover={isFormValid && emailVerified ? { scale: 1.02 } : {}}
+                  whileTap={isFormValid && emailVerified ? { scale: 0.98 } : {}}
+                  onClick={handleSubmit}
+                  className={`w-full py-3.5 rounded-md font-semibold text-[15px] transition-all duration-200 ${
+                    isFormValid && emailVerified
+                      ? 'bg-[#1E4ED8] text-white hover:bg-[#1a3eb3] cursor-pointer'
+                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                  }`}
                 >
-                  CMT submission link will be coming shortly
+                  {!emailVerified ? 'Verify Email to Continue' : isSubmitting ? 'Submitting...' : 'Submit Registration'}
                 </motion.button>
                 <p className="text-center text-[12px] text-[#475569] mt-3">
                   By submitting, you agree to our terms and conditions. We will verify your payment and send confirmation to your email.
                 </p>
               </div>
-            </form>
+            </div>
           </motion.div>
         </div>
       </motion.section>
-    {/* CMT Acknowledgment Footer */}
-    <footer className="cmt-acknowledgment">
-      <div className="cmt-container">
-        <div className="cmt-title">Submission Platform Acknowledgment</div>
-        <p>
-          The Microsoft CMT service was used for managing the peer-reviewing process for this conference. This service was provided for free by Microsoft and they bore all expenses, including costs for Azure cloud services as well as for software development and support.
-        </p>
-      </div>
-    </footer>
-  </div>
-);
+    </div>
+  );
 }

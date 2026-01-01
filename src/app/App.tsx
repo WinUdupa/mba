@@ -7,6 +7,7 @@ import { SpeakersPage } from "./pages/SpeakersPage";
 import { CommitteesPage } from "./pages/CommitteesPage";
 import { ContactPage } from "./pages/ContactPage";
 import { VenuePage } from "./pages/VenuePage";
+import { AdminDashboard } from './pages/AdminDashboard';
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -41,7 +42,9 @@ function AppRoutes() {
   return (
     <Layout currentPage={currentPage} onNavigate={handleNavigate}>
       <Routes>
+        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/" element={<HomePage onNavigate={handleNavigate} />} />
+        
         <Route path="/registration" element={<RegistrationPage onNavigate={handleNavigate} />} />
         <Route path="/speakers" element={<SpeakersPage onNavigate={handleNavigate} />} />
         <Route path="/committees" element={<CommitteesPage onNavigate={handleNavigate} />} />
