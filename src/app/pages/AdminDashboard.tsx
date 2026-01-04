@@ -8,8 +8,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 interface Registration {
   id: string;
-  first_name: string;
-  last_name: string;
+  name: string;
   email: string;
   phone: string;
   institution: string;
@@ -119,7 +118,7 @@ export function AdminDashboard() {
       filtered = filtered.filter(
         reg =>
           reg.email.toLowerCase().includes(term) ||
-          `${reg.first_name} ${reg.last_name}`.toLowerCase().includes(term) ||
+          reg.name.toLowerCase().includes(term) ||
           reg.institution.toLowerCase().includes(term)
       );
     }
@@ -146,10 +145,11 @@ export function AdminDashboard() {
 
       if (error) throw error;
 
-      setRegistrations(prev =>
-        prev.map(reg => reg.id === id ? { ...reg, payment_status: newStatus } : reg)
+      const updatedRegistrations = registrations.map(reg => 
+        reg.id === id ? { ...reg, payment_status: newStatus } : reg
       );
-      filterRegistrations(registrations, filterStatus, searchTerm);
+      setRegistrations(updatedRegistrations);
+      filterRegistrations(updatedRegistrations, filterStatus, searchTerm);
     } catch (err) {
       console.error('Error updating status:', err);
     }
@@ -347,7 +347,7 @@ export function AdminDashboard() {
                 ) : (
                   filteredRegistrations.map((reg) => (
                     <tr key={reg.id} className="border-b border-gray-200 hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm text-gray-900">{reg.first_name} {reg.last_name}</td>
+                      <td className="px-6 py-4 text-sm text-gray-900">{reg.name}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">{reg.email}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">{reg.institution}</td>
                       <td className="px-6 py-4 text-sm text-gray-900">{reg.amount_paid}</td>

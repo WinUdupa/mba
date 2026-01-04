@@ -434,18 +434,14 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
         }
       }
 
-      // Split name into first and last name
-      const nameParts = formData.name.trim().split(' ');
-      const firstName = nameParts[0];
-      const lastName = nameParts.slice(1).join(' ') || '';
+
 
       // Save registration data to Supabase database
       const { data, error } = await supabase
         .from('conference_registrations')
         .insert([
           {
-            first_name: firstName,
-            last_name: lastName,
+            name: formData.name,
             email: formData.email,
             phone: formData.phone,
             institution: formData.affiliation,
