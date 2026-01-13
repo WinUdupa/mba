@@ -420,78 +420,76 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
   };
 
   const uploadAndSaveRegistration = async () => {
-    try {
-      let paymentProofPath = null;
+  try {
+    let paymentProofPath = null;
 
-      // Upload payment proof file if exists
-      if (formData.paymentProof) {
-        paymentProofPath = await uploadFileToSupabase(formData.paymentProof, formData.email);
-        
-        if (!paymentProofPath) {
-          setErrors(prev => ({ ...prev, paymentProof: 'Failed to upload file. Please try again.' }));
-          setIsSubmitting(false);
-          return;
-        }
-      }
-
-
-
-      // Save registration data to Supabase database
-      const { data, error } = await supabase
-        .from('conference_registrations')
-        .insert([
-          {
-            name: formData.name,
-            email: formData.email,
-            phone: formData.phone,
-            institution: formData.affiliation,
-            place_of_affiliation: formData.placeOfAffiliation,
-            country: formData.nationality,
-            paper_title: formData.paperTitle,
-            paper_id: formData.paperId,
-            track_number: formData.trackNumber,
-            payment_status: 'pending',
-            amount_paid: formData.amountPaid,
-            payment_account: formData.paymentAccount,
-            transaction_id: formData.transactionId,
-            payment_proof_path: paymentProofPath
-          }
-        ]);
-
-      if (error) {
-        console.error('Database error:', error);
-        alert('Error saving registration. Please try again.');
+    // Upload payment proof file if exists
+    if (formData.paymentProof) {
+      paymentProofPath = await uploadFileToSupabase(formData.paymentProof, formData.email);
+      
+      if (!paymentProofPath) {
+        setErrors(prev => ({ ...prev, paymentProof: 'Failed to upload file. Please try again.' }));
         setIsSubmitting(false);
         return;
       }
-
-      alert("Registration submitted successfully! We will verify your payment and send confirmation to your email.");
-      setIsSubmitting(false);
-
-      // Reset form
-      setFormData({
-        name: "",
-        nationality: "",
-        phone: "",
-        email: "",
-        affiliation: "",
-        placeOfAffiliation: "",
-        paperTitle: "",
-        trackNumber: "",
-        paperId: "",
-        amountPaid: "",
-        paymentAccount: "",
-        transactionId: "",
-        paymentProof: null
-      });
-      setEmailVerified(false);
-      setVerifyStep('idle');
-    } catch (err) {
-      console.error('Registration error:', err);
-      alert('An error occurred. Please try again.');
-      setIsSubmitting(false);
     }
-  };
+
+    // Save registration data to Supabase database
+    const { data, error } = await supabase
+      .from('conference_registrations')
+      .insert([
+        {
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          institution: formData.affiliation,
+          place_of_affiliation: formData.placeOfAffiliation,
+          country: formData.nationality,
+          paper_title: formData.paperTitle,
+          paper_id: formData.paperId,
+          track_number: formData.trackNumber,
+          payment_status: 'pending',
+          amount_paid: formData.amountPaid,
+          payment_account: formData.paymentAccount,
+          transaction_id: formData.transactionId,
+          payment_proof_path: paymentProofPath
+        }
+      ]);
+
+    if (error) {
+      console.error('Database error:', error);
+      alert('Error saving registration. Please try again.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    alert("Registration submitted successfully! We will verify your payment and send confirmation to your email.");
+    setIsSubmitting(false);
+
+    // Reset form
+    setFormData({
+      name: "",
+      nationality: "",
+      phone: "",
+      email: "",
+      affiliation: "",
+      placeOfAffiliation: "",
+      paperTitle: "",
+      trackNumber: "",
+      paperId: "",
+      amountPaid: "",
+      paymentAccount: "",
+      transactionId: "",
+      paymentProof: null
+    });
+    setEmailVerified(false);
+    setVerifyStep('idle');
+  } catch (err) {
+    console.error('Registration error:', err);
+    alert('An error occurred. Please try again.');
+    setIsSubmitting(false);
+  }
+};
 
   const getInputClassName = (field: string, baseClass: string = "h-10"): string => {
     const hasError = touched[field] && errors[field as keyof FieldErrors];
@@ -629,6 +627,171 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                 </motion.div>
               ))}
             </div>
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="mt-4 bg-[#FFF7ED] border-l-4 border-[#F97316] rounded-md p-4"
+            >
+              <p className="text-[#0F172A] text-[13px] sm:text-[14px]">
+                <strong>Note:</strong> Registration fee includes conference kit, meals, and access to all sessions. At least one author per accepted paper must register. Certificates for co-authors (not registered) will be provided upon payment of Rs. 500 per co-author.
+              </p>
+            </motion.div>
+
+            {/* Bank Account Details */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="mt-6 bg-gradient-to-br from-[#0B1F3A] to-[#1E4ED8] rounded-xl p-6 sm:p-8 text-white"
+            >
+              <h3 className="text-[20px] sm:text-[24px] font-['Montserrat',sans-serif] font-bold mb-6">
+                Bank Account Details
+              </h3>
+              
+              {/* Bank Details Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">Account Name</p>
+                  <p className="text-white text-[15px] sm:text-[16px] font-semibold">BNMIT-MBA</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">Bank Name</p>
+                  <p className="text-white text-[15px] sm:text-[16px] font-semibold">Canara Bank</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">Account Number</p>
+                  <p className="text-white text-[15px] sm:text-[16px] font-semibold">1147101031035</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">IFSC Code</p>
+                  <p className="text-white text-[15px] sm:text-[16px] font-semibold">CNRB0001147</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">Branch Code</p>
+                  <p className="text-white text-[15px] sm:text-[16px] font-semibold">1147</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">MICR Code</p>
+                  <p className="text-white text-[15px] sm:text-[16px] font-semibold">560015006</p>
+                </div>
+                <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 sm:col-span-2">
+                  <p className="text-white/70 text-[12px] sm:text-[13px] mb-1">Branch Address</p>
+                  <p className="text-white text-[14px] sm:text-[15px] font-semibold">24/25, 27th Cross, Sevakshetra Complex, Banashankari II Stage, Bangalore - 560070</p>
+                </div>
+              </div>
+              
+              {/* UPI Note */}
+              <div className="mt-6 bg-[#F97316] rounded-lg p-4">
+                <p className="text-white text-[14px] sm:text-[15px] font-medium">
+                  <strong>Note:</strong> While paying through UPI, please add a note as <span className="underline font-bold">'Towards BNMIT Conference 2026'</span>
+                </p>
+              </div>
+              
+              {/* QR Code - Below Bank Details */}
+              <div className="mt-6 flex justify-center">
+                <div className="bg-white rounded-xl p-5 sm:p-6 shadow-lg inline-block">
+                  <img 
+                    src={UPI} 
+                    alt="UPI QR Code for Payment" 
+                    className="w-[280px] sm:w-[320px] lg:w-[360px] h-auto mx-auto"
+                  />
+                  <p className="text-[#0B1F3A] text-[16px] sm:text-[18px] font-bold mt-4 text-center">Scan to Pay via UPI</p>
+                  <p className="text-[#475569] text-[13px] sm:text-[14px] text-center mt-1">Works with GPay, PhonePe, Paytm & all UPI apps</p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Cancellation Policy */}
+      <section className="py-10 sm:py-12 bg-[#F8FAFC] border-t border-[#E2E8F0]">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-12 xl:px-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <h2 className="text-[#0B1F3A] text-[24px] sm:text-[28px] lg:text-[32px] font-['Montserrat',sans-serif] font-bold mb-6 text-center">
+              Cancellation & <span className="text-[#F97316]">Refund Policy</span>
+            </h2>
+            
+            <div className="bg-white rounded-xl border border-[#E2E8F0] overflow-hidden shadow-sm">
+              {/* Refund Policy Row */}
+              <div className="flex flex-col sm:flex-row border-b border-[#E2E8F0]">
+                <div className="sm:w-1/4 bg-[#0B1F3A] px-6 py-5 flex items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <span className="text-white font-bold text-[16px] sm:text-[18px]">Refund Policy</span>
+                  </div>
+                </div>
+                <div className="sm:w-3/4 px-6 py-5 space-y-3">
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-[#10B981] flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="text-[#334155] text-[14px] sm:text-[15px]">
+                      <span className="font-bold text-[#0B1F3A]">Before April 05, 2026:</span> Full refund will be provided (₹1,000 cancellation charges applicable)
+                    </p>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="w-6 h-6 rounded-full bg-[#EF4444] flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </div>
+                    <p className="text-[#334155] text-[14px] sm:text-[15px]">
+                      <span className="font-bold text-[#0B1F3A]">After April 05, 2026:</span> No refund will be provided
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notification Row */}
+              <div className="flex flex-col sm:flex-row border-b border-[#E2E8F0]">
+                <div className="sm:w-1/4 bg-[#0B1F3A] px-6 py-5 flex items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                    <span className="text-white font-bold text-[16px] sm:text-[18px]">Contact</span>
+                  </div>
+                </div>
+                <div className="sm:w-3/4 px-6 py-5 flex items-center">
+                  <p className="text-[#334155] text-[14px] sm:text-[15px]">
+                    Submit cancellation requests in writing to <a href="mailto:bnmitconference@bnmit.in" className="text-[#1E4ED8] font-bold hover:underline">bnmitconference@bnmit.in</a>
+                  </p>
+                </div>
+              </div>
+
+              {/* No-Show Row */}
+              <div className="flex flex-col sm:flex-row">
+                <div className="sm:w-1/4 bg-[#0B1F3A] px-6 py-5 flex items-center">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                      </svg>
+                    </div>
+                    <span className="text-white font-bold text-[16px] sm:text-[18px]">No-Show</span>
+                  </div>
+                </div>
+                <div className="sm:w-3/4 px-6 py-5 flex items-center">
+                  <p className="text-[#334155] text-[14px] sm:text-[15px]">
+                    No refunds will be provided for attendees who fail to attend the conference without prior cancellation
+                  </p>
+                </div>
+              </div>
+            </div>
           </motion.div>
         </div>
       </section>
@@ -738,7 +901,7 @@ export function RegistrationPage({ onNavigate }: RegistrationPageProps) {
                           whileTap={{ scale: 0.98 }}
                           className="w-full py-2.5 px-4 rounded-md font-semibold text-[13px] transition-all duration-200 bg-[#1E4ED8] text-white hover:bg-[#1a3eb3] disabled:bg-gray-400 disabled:cursor-not-allowed"
                         >
-                          {isVerifying ? 'Sending...' : verifyStep === 'sent' ? 'Link Sent - Check Email' : 'Verify Email with Magic Link'}
+                          {isVerifying ? 'Sending...' : verifyStep === 'sent' ? 'Link Sent - Check Email' : 'Verify Email'}
                         </motion.button>
                       )}
 

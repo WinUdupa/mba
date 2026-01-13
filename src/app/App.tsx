@@ -42,7 +42,7 @@ function AppRoutes() {
   return (
     <Layout currentPage={currentPage} onNavigate={handleNavigate}>
       <Routes>
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/secure-portal" element={<AdminDashboard />} />
         <Route path="/" element={<HomePage onNavigate={handleNavigate} />} />
         
         <Route path="/registration" element={<RegistrationPage onNavigate={handleNavigate} />} />

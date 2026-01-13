@@ -48,6 +48,7 @@ import VikramBalasubramanian from "@/assets/Mr.Vikaram.jpg.webp";
 import SrinivasBharadwaj from "@/assets/MBA-Srinivas-Bharadwaj-scaled.jpg.webp";
 import NandaKishore from "@/assets/MBA-Nanda-Kishore-Nadig-scaled.jpg.webp";
 import PayalJindal from "@/assets/Mrs.Payal_.jpg.webp";
+import harsha from "@/assets/harsha.jfif"
 
 
 
@@ -116,7 +117,7 @@ const advisoryBoard = [
     name: "Dr. Harsh Purohit",
     affiliation: "Professor, Dean, FMS, WISDOM, Banasthali Vidyapith",
     country: "Rajasthan, India",
-    image: HarshPurohit
+    image: harsha
   },
   {
     name: "Dr. Balasubramanya",

@@ -23,7 +23,6 @@ export function SpeakersPage({ onNavigate }: SpeakersPageProps) {
 const workshopSpeakers = [
   {
     name: "Dr. Mayank Singh",
-    title: "Assistant Professor",
     affiliation: "IIM Bangalore",
     topic: "Research Methodology and Publication Strategies",
     bio: "Dr. Singh specializes in research methodology and has guided numerous scholars in publishing their work in top-tier journals.",
@@ -32,7 +31,6 @@ const workshopSpeakers = [
   },
   {
     name: "Dr. Avinash K Shrivastava",
-    title: "Associate Professor",
     affiliation: "International Management Institute Kolkata",
     topic: "Advanced Data Analytics for Management Research",
     bio: "Dr. Shrivastava is an expert in quantitative research methods and data analytics with extensive experience in management research.",
@@ -41,7 +39,6 @@ const workshopSpeakers = [
   },
   {
     name: "Dr. Subham Singhania",
-    title: "Assistant Professor",
     affiliation: "FORE School of Management, New Delhi",
     topic: "Case Study Development and Teaching",
     bio: "Dr. Singhania specializes in case study methodology and has developed impactful case studies for management education.",
@@ -112,7 +109,6 @@ const workshopSpeakers = [
                     <h3 className="text-[#0B1F3A] text-[20px] sm:text-[24px] font-['Montserrat',sans-serif] font-bold mb-1">
                       {speaker.name}
                     </h3>
-                    <p className="text-[#1E4ED8] text-[14px] sm:text-[16px] font-semibold mb-1">{speaker.title}</p>
                     <p className="text-[#475569] text-[13px] sm:text-[14px]">{speaker.affiliation}</p>
                   </div>
                 </div>
